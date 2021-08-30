@@ -25,9 +25,9 @@
   "author": "Piyush Shrivastava",
   "license": "Unlicense",
   "bugs": {
-    "url": "https://github.com/anton-bot/objects-to-csv/issues"
+    "url": "https://github.com/piyushimraw/objects-to-csv/issues"
   },
-  "homepage": "https://github.com/anton-bot/objects-to-csv#readme",
+  "homepage": "https://github.com/piyushimraw/objects-to-csv#readme",
   "dependencies": {
     "async-csv": "^2.1.3"
   },
