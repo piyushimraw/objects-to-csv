@@ -1,7 +1,7 @@
-'use strict';
+"use strict";
 
-const csv = require('async-csv');
-const fs = require('fs');
+const csv = require("async-csv");
+const fs = require("fs");
 
 /**
  * Converts an array of objects into a CSV file.
@@ -13,12 +13,16 @@ class ObjectsToCsv {
    */
   constructor(objectArray) {
     if (!Array.isArray(objectArray)) {
-      throw new Error('The input to objects-to-csv must be an array of objects.');
+      throw new Error(
+        "The input to objects-to-csv must be an array of objects."
+      );
     }
 
     if (objectArray.length > 0) {
-      if (objectArray.some(row => typeof row !== 'object')) {
-        throw new Error('The array must contain objects, not other data types.');
+      if (objectArray.some((row) => typeof row !== "object")) {
+        throw new Error(
+          "The array must contain objects, not other data types."
+        );
       }
     }
 
@@ -36,7 +40,7 @@ class ObjectsToCsv {
    */
   async toDisk(filename, options) {
     if (!filename) {
-      throw new Error('Empty filename when trying to write to disk.');
+      throw new Error("Empty filename when trying to write to disk.");
     }
 
     let addHeader = false;
@@ -44,26 +48,26 @@ class ObjectsToCsv {
     // If the file didn't exist yet or is empty, add the column headers
     // as the first line of the file. Do not add it when we are appending
     // to an existing file.
-    const fileNotExists = !fs.existsSync(filename) || fs.statSync(filename).size === 0;
+    const fileNotExists =
+      !fs.existsSync(filename) || fs.statSync(filename).size === 0;
     if (fileNotExists || !options || !options.append) {
       addHeader = true;
     }
 
-    const allColumns = options && options.allColumns
-      ? options.allColumns
-      : false;
+    const allColumns =
+      options && options.allColumns ? options.allColumns : false;
 
     let data = await this.toString(addHeader, allColumns);
     // Append the BOM mark if requested at the beginning of the file, otherwise
     // Excel won't show Unicode correctly. The actual BOM mark will be EF BB BF,
     // see https://stackoverflow.com/a/27975629/6269864 for details.
     if (options && options.bom && fileNotExists) {
-      data = '\ufeff' + data;
+      data = "\ufeff" + data;
     }
 
     if (options && options.append) {
       return new Promise((resolve, reject) => {
-        fs.appendFile(filename, data, 'utf8', (error) => {
+        fs.appendFile(filename, data, "utf8", (error) => {
           if (error) {
             reject(error);
           } else {
@@ -73,7 +77,7 @@ class ObjectsToCsv {
       });
     } else {
       return new Promise((resolve, reject) => {
-        fs.writeFile(filename, data, 'utf8', (error) => {
+        fs.writeFile(filename, data, "utf8", (error) => {
           if (error) {
             reject(error);
           } else {
@@ -107,17 +111,18 @@ class ObjectsToCsv {
  */
 async function convert(data, header = true, allColumns = false) {
   if (data.length === 0) {
-    return '';
+    return "";
   }
 
-  const columnNames =
-    allColumns
-      ? [...data
-        .reduce((columns, row) => { // check each object to compile a full list of column names
-          Object.keys(row).map(rowKey => columns.add(rowKey));
+  const columnNames = allColumns
+    ? [
+        ...data.reduce((columns, row) => {
+          // check each object to compile a full list of column names
+          Object.keys(row).map((rowKey) => columns.add(rowKey));
           return columns;
-        }, new Set())]
-      : Object.keys(data[0]); // just figure out columns from the first item in array
+        }, new Set()),
+      ]
+    : Object.keys(data[0]); // just figure out columns from the first item in array
 
   if (allColumns) {
     columnNames.sort(); // for predictable order of columns
@@ -131,9 +136,15 @@ async function convert(data, header = true, allColumns = false) {
   }
 
   // Add all other rows:
-  csvInput.push(
-    ...data.map(row => columnNames.map(column => row[column])),
-  );
+  const allData = [];
+  for (let i = 0; i < data.length; i++) {
+    const row = data[i];
+    allData.push(columnNames.map((column) => row[column]));
+  }
+
+  for (let i = 0; i < allData.length; i++) {
+    csvInput.push(allData[i]);
+  }
 
   return await csv.stringify(csvInput);
 }
